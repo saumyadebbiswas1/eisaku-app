@@ -68,12 +68,7 @@ export class LoginComponent implements OnInit {
         }));
         this.router.navigate(['inout']);
       } else {
-        const alert = await this.alertCtrl.create({
-          header: 'Error!',
-          message: 'Credential not matched!',
-          buttons: ['OK'],
-        });
-        alert.present();
+        this.showAlert('Error!', 'Credential not matched!');
       }
     } else {
       // this.dataService.showError('Please fill require details'); // --- Display error message
@@ -83,6 +78,15 @@ export class LoginComponent implements OnInit {
         control.markAsDirty({ onlySelf: true });
       });
     }
+  }
+
+  async showAlert(header, message) {
+    const alert = await this.alertCtrl.create({
+      header,
+      message,
+      buttons: ['OK'],
+    });
+    alert.present();
   }
 
 }

@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { AlertController, Platform } from '@ionic/angular';
 import * as moment from 'moment';
+import { AndroidPermissions } from '@ionic-native/android-permissions/ngx';
+import { LocationAccuracy } from '@ionic-native/location-accuracy/ngx';
 import { Geolocation } from '@ionic-native/geolocation/ngx';
 import { NativeGeocoder, NativeGeocoderOptions, NativeGeocoderResult } from '@ionic-native/native-geocoder/ngx';
 
@@ -30,6 +32,8 @@ export class InoutComponent implements OnInit {
   constructor(
     private platform: Platform,
     public alertCtrl: AlertController,
+    private androidPermissions: AndroidPermissions,
+    private locationAccuracy: LocationAccuracy,
     private geolocation: Geolocation,
     private nativeGeocoder: NativeGeocoder,
   ) { }
@@ -53,6 +57,68 @@ export class InoutComponent implements OnInit {
     clearInterval(this.timer);
   }
 
+  giveAttendance(status) {
+    if (!status) {
+      this.confirmAbsent('Are You Sure!', 'You can\'t present today once you absent.');
+    } else {
+      // this.attendanceStatus = status;
+      this.checkGPSPermission();
+    }
+  }
+
+  // -- Check if application having GPS access permission
+  checkGPSPermission() {
+    this.androidPermissions.checkPermission(this.androidPermissions.PERMISSION.ACCESS_COARSE_LOCATION).then(result => {
+        if (result.hasPermission) {
+          // -- If having permission show 'Turn On GPS' dialogue
+          this.askToTurnOnGPS();
+        } else {
+          // -- If not having permission ask for permission
+          this.requestGPSPermission();
+        }
+      },
+      err => {
+        console.log('checkGPSPermission error: ', err);
+        this.showAlert('Error!', 'Unable to check location permission!');
+      }
+    );
+  }
+
+  requestGPSPermission() {
+    this.locationAccuracy.canRequest().then((canRequest: boolean) => {
+      if (canRequest) {
+        this.showAlert('Something Wrong!', 'Please turn on your location!');
+        console.log('requestGPSPermission canRequest: ', canRequest);
+      } else {
+        // -- Show 'GPS Permission Request' dialogue
+        this.androidPermissions.requestPermission(this.androidPermissions.PERMISSION.ACCESS_COARSE_LOCATION)
+          .then(() => {
+              // -- Call method to turn on GPS
+              this.askToTurnOnGPS();
+            },
+            error => {
+              // -- Show alert if user click on 'No Thanks'
+              console.log('requestGPSPermission error: ', error);
+              this.showAlert('Error!', 'Requesting location permissions is required to proceed!');
+            }
+          );
+      }
+    });
+  }
+
+  askToTurnOnGPS() {
+    this.locationAccuracy.request(this.locationAccuracy.REQUEST_PRIORITY_HIGH_ACCURACY).then(
+      () => {
+        // -- When GPS Turned ON call method to get Accurate location coordinates
+        this.getGeolocation();
+      },
+      error => {
+        console.log('askToTurnOnGPS error: ', error);
+        this.showAlert('Error!', 'Unable to turn on GPS!');
+      }
+    );
+  }
+
   // -- Get current coordinates of device
   getGeolocation() {
     this.geolocation.getCurrentPosition().then((resp) => {
@@ -73,6 +139,7 @@ export class InoutComponent implements OnInit {
     this.nativeGeocoder.reverseGeocode(latitude, longitude, this.geoencoderOptions)
       .then((result: NativeGeocoderResult[]) => {
         this.address = this.generateAddress(result[0]);
+        this.attendanceStatus = true;
       })
       .catch((error: any) => {
         alert('Error getting location' + JSON.stringify(error));
@@ -95,14 +162,6 @@ export class InoutComponent implements OnInit {
       }
     }
     return address.slice(0, -2);
-  }
-
-  giveAttendance(status) {
-    if (!status) {
-      this.confirmAbsent('Are You Sure!', 'You can\'t present today once you absent.');
-    } else {
-      this.attendanceStatus = status;
-    }
   }
 
   async confirmAbsent(header, message) {
@@ -128,6 +187,15 @@ export class InoutComponent implements OnInit {
           }
         }
       ]
+    });
+    alert.present();
+  }
+
+  async showAlert(header, message) {
+    const alert = await this.alertCtrl.create({
+      header,
+      message,
+      buttons: ['OK'],
     });
     alert.present();
   }
