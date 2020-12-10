@@ -1,0 +1,26 @@
+<ion-content>
+  <div class="login-page">
+    <div class="container">
+      <img src="../../assets/images/site-logo-one.png">
+        <form [formGroup]="login" (ngSubmit)="submitLogin()">
+          <!-- Mobile Number -->
+          <div class="form-group">
+            <input type="text" class="form-control cstm-inpt" placeholder="Mobile Number"formControlName="phone" [ngClass]="{'is-invalid': login.controls?.phone?.invalid && login.controls?.phone?.touched }">
+            <div *ngIf="login.controls?.phone?.errors?.required" class="invalid-feedback">
+              Mobile Number is required.
+            </div>   
+          </div>
+          <!-- Password -->
+          <div class="form-group">
+            <input type="password" class="form-control cstm-inpt" placeholder="Password" formControlName="password" [ngClass]="{'is-invalid': login.controls?.password?.invalid && login.controls?.password?.touched }">
+            <div *ngIf="login.controls?.password?.errors?.required" class="invalid-feedback">
+              Password is required.
+            </div> 
+          </div>
+          <div class="form-group">
+            <button type="submit" class="btn btn-success w-100 cstm-btn" [disabled]="!login.valid">Login</button>
+          </div>
+        </form>
+    </div>
+  </div>
+</ion-content>

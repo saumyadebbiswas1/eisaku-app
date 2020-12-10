@@ -1,0 +1,56 @@
+<ion-content>
+  <div class="in-out-sec">
+    <div class="inner-content">
+      <button type="button" class="btn btn-danger cstm-btn-2" (click)="giveAttendance(true)" *ngIf="!attendanceStatus">OUT</button>
+      <button type="button" class="btn btn-success cstm-btn-2" (click)="giveAttendance(false)" *ngIf="attendanceStatus">IN</button>
+      
+      <p class="mt-2">{{ currentTime }}</p>
+    </div>
+  </div>
+
+  <ion-grid>
+
+    <!-- Latitude -->
+    <ion-row>
+      <ion-col size="4" class="ion-text-center">
+        Latitue
+      </ion-col>
+      <ion-col>
+        <ion-badge class="ion-text-wrap" color="medium">{{latitude}}</ion-badge>
+      </ion-col>
+    </ion-row>
+
+    <!-- Longitude -->
+    <ion-row>
+      <ion-col size="4" class="ion-text-center">
+        longitude
+      </ion-col>
+      <ion-col>
+        <ion-badge class="ion-text-wrap" color="medium">{{longitude}}</ion-badge>
+      </ion-col>
+    </ion-row>
+
+    <!-- Accuracy -->
+    <ion-row>
+      <ion-col size="4" class="ion-text-center" color="medium">
+        Accuracy
+      </ion-col>
+      <ion-col>
+        <ion-badge class="ion-text-wrap" color="medium">{{accuracy}}</ion-badge>
+      </ion-col>
+    </ion-row>
+
+    <!-- Address -->
+    <ion-row>
+      <ion-col size="4" class="ion-text-center">
+        Address
+      </ion-col>
+      <ion-col>
+        <ion-badge class="ion-text-wrap" color="medium">{{address}}</ion-badge>
+      </ion-col>
+    </ion-row>
+
+  </ion-grid>
+
+  <ion-button (click)="getGeolocation()" color="success" expand="full">Get Location</ion-button>
+</ion-content>

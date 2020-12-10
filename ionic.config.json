@@ -1,0 +1,7 @@
+{
+  "name": "eisaku",
+  "integrations": {
+    "cordova": {}
+  },
+  "type": "angular"
+}
