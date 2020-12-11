@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  apiUrl: 'https://develop-shopify.farmacorp.com/api/'
+  apiUrl: 'http://eisaku.co.in/ems/api/'
 };
 
 /*

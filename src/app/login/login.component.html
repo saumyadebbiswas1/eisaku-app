@@ -3,14 +3,14 @@
     <div class="container">
       <img src="../../assets/images/site-logo-one.png">
         <form [formGroup]="login" (ngSubmit)="submitLogin()">
-          <!-- Mobile Number -->
+          <!-- Email -->
           <div class="form-group">
-            <input type="text" class="form-control cstm-inpt" placeholder="Mobile Number"formControlName="phone" [ngClass]="{'is-invalid': login.controls?.phone?.invalid && login.controls?.phone?.touched }">
-            <div *ngIf="login.controls?.phone?.errors?.required" class="invalid-feedback">
-              Mobile Number is required.
+            <input type="text" class="form-control cstm-inpt" placeholder="Email" formControlName="email" [ngClass]="{'is-invalid': login.controls?.email?.invalid && login.controls?.email?.touched }">
+            <div *ngIf="login.controls?.email?.errors?.required" class="invalid-feedback">
+              Email is required.
             </div>
-            <div *ngIf="login.controls?.phone?.errors?.pattern" class="invalid-feedback">
-              Mobile number is not valid.
+            <div *ngIf="login.controls?.email?.errors?.pattern" class="invalid-feedback">
+              Email is not valid.
             </div>  
           </div>
           <!-- Password -->

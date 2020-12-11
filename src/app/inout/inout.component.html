@@ -1,8 +1,8 @@
 <ion-content>
   <div class="in-out-sec">
     <div class="inner-content">
-      <button type="button" class="btn btn-danger cstm-btn-2" (click)="giveAttendance(true)" *ngIf="!attendanceStatus">OUT</button>
-      <button type="button" class="btn btn-success cstm-btn-2" (click)="giveAttendance(false)" *ngIf="attendanceStatus">IN</button>
+      <button type="button" class="btn btn-danger cstm-btn-2" (click)="giveAttendance()" *ngIf="!attendanceStatus">OUT</button>
+      <button type="button" class="btn btn-success cstm-btn-2" (click)="giveAttendance()" *ngIf="attendanceStatus">IN</button>
       
       <p class="mt-2">{{ currentTime }}</p>
     </div>

@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://develop-shopify.farmacorp.com/api/'
+  apiUrl: 'http://eisaku.co.in/ems/api/'
 };
