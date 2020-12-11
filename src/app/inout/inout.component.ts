@@ -18,7 +18,7 @@ export class InoutComponent implements OnInit {
   // currentDate = moment().format('ddd, D MMM YY');
   timer: any;
   attendanceStatus = false;
-  address: string; // -- Readable Address
+  address: string = null; // -- Readable Address
   // Location coordinates
   latitude: number;
   longitude: number;

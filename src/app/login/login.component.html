@@ -8,7 +8,10 @@
             <input type="text" class="form-control cstm-inpt" placeholder="Mobile Number"formControlName="phone" [ngClass]="{'is-invalid': login.controls?.phone?.invalid && login.controls?.phone?.touched }">
             <div *ngIf="login.controls?.phone?.errors?.required" class="invalid-feedback">
               Mobile Number is required.
-            </div>   
+            </div>
+            <div *ngIf="login.controls?.phone?.errors?.pattern" class="invalid-feedback">
+              Mobile number is not valid.
+            </div>  
           </div>
           <!-- Password -->
           <div class="form-group">
