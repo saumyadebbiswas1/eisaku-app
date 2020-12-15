@@ -1,8 +1,26 @@
 <ion-content>
-  <div class="in-out-sec">
+  <div class="in-out-sec" *ngIf="!loading">
+    <div class="inner-content" *ngIf="errorText !== ''">
+      <p class="mt-2">{{ errorText }}</p>
+    </div>
+
     <div class="inner-content">
-      <button type="button" class="btn btn-danger cstm-btn-2" (click)="giveAttendance()" *ngIf="!attendanceStatus">OUT</button>
-      <button type="button" class="btn btn-success cstm-btn-2" (click)="giveAttendance()" *ngIf="attendanceStatus">IN</button>
+      <p class="mt-2" *ngIf="attendanceStatus">
+        You are <strong>signed in</strong>
+        <ng-container *ngIf="attendanceDateTime !== null">
+           at <br/>
+          {{ attendanceDateTime }}
+        </ng-container>
+      </p>
+      <p class="mt-2"*ngIf="!attendanceStatus">
+        You are <strong>signed out</strong>
+        <ng-container *ngIf="attendanceDateTime !== null">
+           at <br/>
+          {{ attendanceDateTime }}
+        </ng-container>
+      </p>
+      <button type="button" class="btn btn-danger cstm-btn-2" (click)="giveAttendance()" *ngIf="attendanceStatus">OUT</button>
+      <button type="button" class="btn btn-success cstm-btn-2" (click)="giveAttendance()" *ngIf="!attendanceStatus">IN</button>
       
       <p class="mt-2">{{ currentTime }}</p>
     </div>

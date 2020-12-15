@@ -17,15 +17,20 @@ export class InoutComponent implements OnInit {
 
   subscription: any;
   userId: any;
-  currentTime = moment().format('H:mm:ss');
+  currentDateTime = moment();
+  currentTime: any = moment().format('h:mm:ss A');
   // currentDate = moment().format('ddd, D MMM YY');
   timer: any;
+  loading = true;
+  errorText = '';
+  checkAttendanceStatus = false;
   attendanceStatus = false;
+  attendanceDateTime = null;
   // Location coordinates
-  latitude = 123456.789456;
-  longitude = 789456.123547;
+  latitude = null;
+  longitude = null;
   accuracy: number;
-  address = 'abcd, 012 road, kolkata'; // -- Readable Address
+  address = ''; // -- Readable Address
   // -- Geocoder configuration
   geoencoderOptions: NativeGeocoderOptions = {
     useLocale: true,
@@ -47,8 +52,9 @@ export class InoutComponent implements OnInit {
 
   ngOnInit() {
     this.timer = setInterval(() => {
-      this.currentTime = moment().format('H:mm:ss');
-      // this.currentDate = moment().format('ddd, D MMM YY');
+      // this.currentTime = moment().format('H:mm:ss');
+      this.currentDateTime = moment(this.currentDateTime).add(1, 'seconds');
+      this.currentTime = moment(this.currentDateTime).format('h:mm:ss A');
     }, 1000);
   }
 
@@ -56,8 +62,8 @@ export class InoutComponent implements OnInit {
     const loginDetails = JSON.parse(localStorage.getItem('loginDetails'));
     if (loginDetails.userId && loginDetails.userId != null) {
       this.userId = loginDetails.userId;
-      const currentTime = moment(loginDetails.loginTime).format('H:mm:ss');
-      console.log('this.userId, currentTime: ', this.userId, currentTime);
+      this.errorText = '';
+      this.checkAttendance();
     } else {
       this.showAlert('Error!', 'Invalid accesss!');
       this.router.navigate(['login']);
@@ -76,14 +82,69 @@ export class InoutComponent implements OnInit {
     clearInterval(this.timer);
   }
 
+  async checkAttendance(): Promise<void> {
+    const credentials = {
+      userId: this.userId,
+    };
+    // console.log('checkAttendance credentials: ', credentials);
+    const url  = `getAttendance`;
+    // this.showLoader('Please wait...');
+    const loading = await this.loadingController.create({
+      message: 'Please wait...',
+      spinner: 'bubbles',
+    });
+    loading.present();
+    this.loading = true;
+    this.apiService.sendHttpCall(credentials , url , 'post').subscribe(response => {
+      // console.log('Login response: ', response);
+      // this.hideLoader();
+      loading.dismiss();
+      this.loading = false;
+      if (response.code && (response.code === 200 || response.code === 201)) {
+        this.checkAttendanceStatus = true;
+        const currentDateTime = new Date(response.currentDate + ' ' + response.currentTime);
+        this.currentDateTime = moment(currentDateTime);
+        // console.log('currentDateTime: ', this.currentDateTime );
+        if (response.details) {
+          if (response.details[0].attendance_type === '1') {
+            this.attendanceStatus = true;
+            const attendanceDateTime = new Date(response.details[0].attendance_date + ' ' + response.details[0].attendance_time);
+            this.attendanceDateTime = moment(attendanceDateTime).format('ddd, D MMM YY h:mm A');
+          } else {
+            this.attendanceStatus = false;
+            const attendanceDateTime = new Date(response.details[0].attendance_date + ' ' + response.details[0].attendance_time);
+            this.attendanceDateTime = moment(attendanceDateTime).format('ddd, D MMM YY h:mm A');
+          }
+        } else {
+          this.attendanceStatus = false;
+          this.attendanceDateTime = null;
+        }
+      } else {
+        if (response.message) {
+          this.showAlert('Error!', response.message);
+        } else {
+          this.showAlert('Error!', 'Unable to check attendance!');
+          this.errorText = 'Unable to check attendance, please reload the app once!';
+        }
+      }
+    }, (err) => {
+      console.log('checkAttendance error: ', err);
+      // this.hideLoader();
+      loading.dismiss();
+      this.loading = false;
+      this.showAlert('Error!', 'Unable to check attendance!');
+      this.errorText = 'Unable to check attendance, please reload the app once!';
+    });
+  }
+
   giveAttendance() {
-    // this.checkGPSPermission();
-    this.callAttendanceApi();
+    this.checkGPSPermission(); // -- For mobile test
+    // this.callAttendanceApi(); // -- For browser test
   }
 
   // -- Check if application having GPS access permission
   checkGPSPermission() {
-    console.log('Checking permission...');
+    // console.log('Checking permission...');
     this.androidPermissions.checkPermission(this.androidPermissions.PERMISSION.ACCESS_COARSE_LOCATION).then(result => {
         if (result.hasPermission) {
           // -- If having permission show 'Turn On GPS' dialogue
@@ -182,36 +243,84 @@ export class InoutComponent implements OnInit {
 
   callAttendanceApi() {
     if (this.attendanceStatus === false) {
-      this.changeAttendance(true);
+      this.checkLastPresent();
     } else {
       this.confirmAbsent('Are You Sure!', 'You can\'t present today once you absent.');
     }
   }
 
-  async changeAttendance(status): Promise<void> {
-    // this.attendanceStatus = status;
-    let attendanceType = 0;
-    if (status === true) {
-      attendanceType = 1;
-    } else {
-      attendanceType = 2;
-    }
-
+  async checkLastPresent(): Promise<void> {
     const credentials = {
       userId: this.userId,
-      latitude: this.latitude,
-      longitude: this.longitude,
-      currentAddress: this.address,
-      attendanceType,
     };
-    console.log('changeAttendance credentials: ', credentials);
-    const url  = `addAttendance`;
-    this.showLoader('Please wait...');
+    // console.log('checkLastPresent credentials: ', credentials);
+    const url  = `getLastPresent`;
+    const loading1 = await this.loadingController.create({
+      message: 'Please wait...',
+      spinner: 'bubbles',
+    });
+    loading1.present();
     this.apiService.sendHttpCall(credentials , url , 'post').subscribe(response => {
+      loading1.dismiss();
+      if (response.code && (response.code === 200 || response.code === 201)) {
+        if (response.details) {
+          let lastPresentDateTime: any = new Date(response.details[0].attendance_date + ' ' + response.details[0].attendance_time);
+          lastPresentDateTime = moment(lastPresentDateTime);
+          // console.log('lastPresentDateTime: ', lastPresentDateTime);
+          const currentDateTime = moment();
+          // console.log('currentDateTime: ', currentDateTime);
+          const lastPresentDateTime12HrAdd = moment(lastPresentDateTime).add(12, 'hours');
+          // console.log('lastPresentDateTime12HrAdd: ', lastPresentDateTime12HrAdd);
+
+          if (lastPresentDateTime12HrAdd >= currentDateTime) {
+            this.showAlert('Error!', 'You already signed in before 12 hour!');
+          } else {
+            this.changeAttendance(true);
+          }
+        } else {
+          this.changeAttendance(true);
+        }
+      } else {
+        if (response.message) {
+          this.showAlert('Error!', response.message);
+        } else {
+          this.showAlert('Error!', 'Unable to check last sign in details!');
+        }
+      }
+    }, (err) => {
+      console.log('checkLastPresent error: ', err);
+      loading1.dismiss();
+      this.showAlert('Error!', 'Unable to check last sign in details!');
+    });
+  }
+
+  async changeAttendance(status): Promise<void> {
+    if (this.checkAttendanceStatus === true) {
+      // this.attendanceStatus = status;
+      let attendanceType = 0;
+      if (status === true) {
+        attendanceType = 1;
+      } else {
+        attendanceType = 2;
+      }
+
+      const credentials = {
+        userId: this.userId,
+        latitude: this.latitude,
+        longitude: this.longitude,
+        currentAddress: this.address,
+        attendanceType,
+      };
+      // console.log('changeAttendance credentials: ', credentials);
+      const url  = `addAttendance`;
+      this.showLoader('Please wait...');
+      this.apiService.sendHttpCall(credentials , url , 'post').subscribe(response => {
       // console.log('Login response: ', response);
       this.hideLoader();
       if (response.code && (response.code === 200 || response.code === 201)) {
         this.attendanceStatus = status;
+        const attendanceDateTime = new Date(response.insertDate + ' ' + response.insertTime);
+        this.attendanceDateTime = moment(attendanceDateTime).format('ddd, D MMM YY h:mm A');
         if (status === true) {
           this.showToastMessage('Sign in successfully!');
         } else {
@@ -229,6 +338,9 @@ export class InoutComponent implements OnInit {
       this.hideLoader();
       this.showAlert('Error!', 'Unable to change attendance!');
     });
+    } else {
+      this.showAlert('Error!', 'Unable to check attendance, please reload the app once more!');
+    }
   }
 
   async confirmAbsent(header, message) {
