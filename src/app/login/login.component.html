@@ -5,7 +5,7 @@
         <form [formGroup]="login" (ngSubmit)="submitLogin()">
           <!-- Email -->
           <div class="form-group">
-            <input type="text" class="form-control cstm-inpt" placeholder="Email" formControlName="email" [ngClass]="{'is-invalid': login.controls?.email?.invalid && login.controls?.email?.touched }">
+            <input type="email" class="form-control cstm-inpt" placeholder="Email" formControlName="email" [ngClass]="{'is-invalid': login.controls?.email?.invalid && login.controls?.email?.touched }">
             <div *ngIf="login.controls?.email?.errors?.required" class="invalid-feedback">
               Email is required.
             </div>

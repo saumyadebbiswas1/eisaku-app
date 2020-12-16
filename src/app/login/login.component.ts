@@ -71,10 +71,14 @@ export class LoginComponent implements OnInit {
         password: this.login.value.password
       };
       const url  = `login`;
-      this.showLoader('Please wait...');
+      const loading = await this.loadingController.create({
+        message: 'Please wait...',
+        spinner: 'bubbles',
+      });
+      loading.present();
       this.apiService.sendHttpCall(credentials , url , 'post').subscribe(response => {
         // console.log('Login response: ', response);
-        this.hideLoader();
+        loading.dismiss();
         if (response.code && (response.code === 200 || response.code === 201)) {
           if (response.user_details && response.user_details.id) {
             localStorage.setItem('loginDetails', JSON.stringify({
@@ -98,7 +102,7 @@ export class LoginComponent implements OnInit {
         }
       }, (err) => {
         console.log('submitLogin error: ', err);
-        this.hideLoader();
+        loading.dismiss();
         this.showAlert('Error!', 'Unable to check login!');
       });
       // if (this.login.value.email === this.adminCredential.email && this.login.value.password === this.adminCredential.password) {

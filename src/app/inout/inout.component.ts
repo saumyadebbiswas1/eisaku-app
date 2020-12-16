@@ -313,10 +313,14 @@ export class InoutComponent implements OnInit {
       };
       // console.log('changeAttendance credentials: ', credentials);
       const url  = `addAttendance`;
-      this.showLoader('Please wait...');
+      const loading2 = await this.loadingController.create({
+        message: 'Please wait...',
+        spinner: 'bubbles',
+      });
+      loading2.present();
       this.apiService.sendHttpCall(credentials , url , 'post').subscribe(response => {
       // console.log('Login response: ', response);
-      this.hideLoader();
+      loading2.dismiss();
       if (response.code && (response.code === 200 || response.code === 201)) {
         this.attendanceStatus = status;
         const attendanceDateTime = new Date(response.insertDate + ' ' + response.insertTime);
@@ -335,7 +339,7 @@ export class InoutComponent implements OnInit {
       }
     }, (err) => {
       console.log('changeAttendance error: ', err);
-      this.hideLoader();
+      loading2.dismiss();
       this.showAlert('Error!', 'Unable to change attendance!');
     });
     } else {
