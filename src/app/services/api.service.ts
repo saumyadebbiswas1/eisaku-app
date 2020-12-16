@@ -20,7 +20,8 @@ export class ApiService {
     } else {
       const httpOptions = {
         headers: new HttpHeaders({
-          accept: 'aplication/json',
+          'Content-Type': 'application/json',
+          // accept: 'aplication/json',
           // Authorization: 'Bearer ' + token
         })
       };
