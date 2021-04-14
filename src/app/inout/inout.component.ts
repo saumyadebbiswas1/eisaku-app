@@ -21,6 +21,7 @@ export class InoutComponent implements OnInit {
   currentTime: any = moment().format('h:mm:ss A');
   // currentDate = moment().format('ddd, D MMM YY');
   timer: any;
+  locationTimer: any;
   loading = true;
   errorText = '';
   checkAttendanceStatus = false;
@@ -36,6 +37,7 @@ export class InoutComponent implements OnInit {
     useLocale: true,
     maxResults: 5
   };
+  isCheckingInterval = false;
 
   constructor(
     private platform: Platform,
@@ -138,6 +140,8 @@ export class InoutComponent implements OnInit {
   }
 
   giveAttendance() {
+    clearInterval(this.locationTimer);
+    this.isCheckingInterval = false;
     this.checkGPSPermission(); // -- For mobile test
     // this.callAttendanceApi(); // -- For browser test
   }
@@ -216,7 +220,11 @@ export class InoutComponent implements OnInit {
     this.nativeGeocoder.reverseGeocode(latitude, longitude, this.geoencoderOptions)
       .then((result: NativeGeocoderResult[]) => {
         this.address = this.generateAddress(result[0]);
-        this.callAttendanceApi();
+        if (this.isCheckingInterval) {
+          this.setLocationAttendanceApi();
+        } else {
+          this.callAttendanceApi();
+        }
       })
       .catch((error: any) => {
         alert('Error getting location' + JSON.stringify(error));
@@ -269,11 +277,11 @@ export class InoutComponent implements OnInit {
           // console.log('lastPresentDateTime: ', lastPresentDateTime);
           const currentDateTime = moment();
           // console.log('currentDateTime: ', currentDateTime);
-          const lastPresentDateTime12HrAdd = moment(lastPresentDateTime).add(12, 'hours');
-          // console.log('lastPresentDateTime12HrAdd: ', lastPresentDateTime12HrAdd);
+          const lastPresentDateTime10HrAdd = moment(lastPresentDateTime).add(10, 'hours');
+          // console.log('lastPresentDateTime10HrAdd: ', lastPresentDateTime12HrAdd);
 
-          if (lastPresentDateTime12HrAdd >= currentDateTime) {
-            this.showAlert('Error!', 'You already signed in before 12 hour!');
+          if (lastPresentDateTime10HrAdd >= currentDateTime) {
+            this.showAlert('Error!', 'You already signed in before 10 hour!');
           } else {
             this.changeAttendance(true);
           }
@@ -327,6 +335,9 @@ export class InoutComponent implements OnInit {
         this.attendanceDateTime = moment(attendanceDateTime).format('ddd, D MMM YY h:mm A');
         if (status === true) {
           this.showToastMessage('Sign in successfully!');
+          this.locationTimer = setInterval(() => {
+            this.checkCurrentLoaction();
+          }, 3600000); // 1hour interval
         } else {
           this.showToastMessage('Sign out successfully!');
         }
@@ -345,6 +356,48 @@ export class InoutComponent implements OnInit {
     } else {
       this.showAlert('Error!', 'Unable to check attendance, please reload the app once more!');
     }
+  }
+
+  checkCurrentLoaction() {
+    this.isCheckingInterval = true;
+    this.checkGPSPermission(); // -- For mobile test
+    // this.setLocationAttendanceApi(); // -- For browser test
+  }
+
+  async setLocationAttendanceApi() {
+    const credentials = {
+      userId: this.userId,
+      latitude: this.latitude,
+      longitude: this.longitude,
+      currentAddress: this.address,
+      attendanceType: 3,
+    };
+    // console.log('changeAttendance credentials: ', credentials);
+    const url  = `addAttendance`;
+    // const loading3 = await this.loadingController.create({
+    //   message: 'Please wait...',
+    //   spinner: 'bubbles',
+    // });
+    // loading3.present();
+    this.apiService.sendHttpCall(credentials , url , 'post').subscribe(response => {
+      // console.log('setLocationAttendanceApi response: ', response);
+      // loading3.dismiss();
+      if (response.code && (response.code === 200 || response.code === 201)) {
+        console.log('Location tracked successfully!');
+        // this.showToastMessage('Location tracked successfully!');
+      } else {
+        console.log('Unable to track location!');
+        // if (response.message) {
+        //   this.showAlert('Error!', response.message);
+        // } else {
+        //   this.showAlert('Error!', 'Unable to track location!');
+        // }
+      }
+    }, (err) => {
+      console.log('setLocationAttendanceApi error: ', err);
+      // loading3.dismiss();
+      // this.showAlert('Error!', 'Unable to change attendance!');
+    });
   }
 
   async confirmAbsent(header, message) {
