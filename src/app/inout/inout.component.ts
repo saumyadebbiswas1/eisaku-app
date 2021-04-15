@@ -114,6 +114,7 @@ export class InoutComponent implements OnInit {
             this.attendanceStatus = true;
             const attendanceDateTime = new Date(response.details[0].attendance_date + ' ' + response.details[0].attendance_time);
             this.attendanceDateTime = moment(attendanceDateTime).format('ddd, D MMM YY h:mm A');
+            this.setCurrentLoactionInterval();
           } else {
             this.attendanceStatus = false;
             const attendanceDateTime = new Date(response.details[0].attendance_date + ' ' + response.details[0].attendance_time);
@@ -337,9 +338,7 @@ export class InoutComponent implements OnInit {
         this.attendanceDateTime = moment(attendanceDateTime).format('ddd, D MMM YY h:mm A');
         if (status === true) {
           this.showToastMessage('Sign in successfully!');
-          this.locationTimer = setInterval(() => {
-            this.checkCurrentLoaction();
-          }, 600000); // 10min interval
+          this.setCurrentLoactionInterval();
         } else {
           this.showToastMessage('Sign out successfully!');
         }
@@ -360,12 +359,20 @@ export class InoutComponent implements OnInit {
     }
   }
 
-  checkCurrentLoaction() {
+  setCurrentLoactionInterval() {
     this.isCheckingInterval = true;
     this.backgroundMode.enable();
     this.backgroundMode.on('activate').subscribe(() => {
-      this.checkGPSPermission(); // -- For mobile test
+      this.locationTimer = setInterval(() => {
+        this.checkCurrentLoaction();
+      }, 600000); // 10min interval
     });
+    this.locationTimer = setInterval(() => {
+      this.checkCurrentLoaction();
+    }, 600000); // 10min interval
+  }
+
+  checkCurrentLoaction() {
     this.checkGPSPermission(); // -- For mobile test
     // this.setLocationAttendanceApi(); // -- For browser test
   }
