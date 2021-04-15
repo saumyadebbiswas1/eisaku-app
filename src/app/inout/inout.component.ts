@@ -337,7 +337,7 @@ export class InoutComponent implements OnInit {
           this.showToastMessage('Sign in successfully!');
           this.locationTimer = setInterval(() => {
             this.checkCurrentLoaction();
-          }, 3600000); // 1hour interval
+          }, 600000); // 10min interval
         } else {
           this.showToastMessage('Sign out successfully!');
         }
