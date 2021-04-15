@@ -7,6 +7,7 @@ import { Geolocation } from '@ionic-native/geolocation/ngx';
 import { NativeGeocoder, NativeGeocoderOptions, NativeGeocoderResult } from '@ionic-native/native-geocoder/ngx';
 import { Router } from '@angular/router';
 import { ApiService } from '../services/api.service';
+import { BackgroundMode } from '@ionic-native/background-mode/ngx';
 
 @Component({
   selector: 'app-inout',
@@ -50,6 +51,7 @@ export class InoutComponent implements OnInit {
     public alertCtrl: AlertController,
     public toastController: ToastController,
     private apiService: ApiService,
+    public backgroundMode: BackgroundMode
   ) { }
 
   ngOnInit() {
@@ -360,6 +362,10 @@ export class InoutComponent implements OnInit {
 
   checkCurrentLoaction() {
     this.isCheckingInterval = true;
+    this.backgroundMode.enable();
+    this.backgroundMode.on('activate').subscribe(() => {
+      this.checkGPSPermission(); // -- For mobile test
+    });
     this.checkGPSPermission(); // -- For mobile test
     // this.setLocationAttendanceApi(); // -- For browser test
   }
