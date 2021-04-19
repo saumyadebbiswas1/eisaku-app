@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  apiUrl: 'http://eisaku.co.in/ems/api/'
+  apiUrl: 'https://eisaku.co.in/ems/api/'
 };
 
 /*

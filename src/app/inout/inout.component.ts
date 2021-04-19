@@ -111,6 +111,7 @@ export class InoutComponent implements OnInit {
         // console.log('currentDateTime: ', this.currentDateTime );
         if (response.details) {
           if (response.details[0].attendance_type === '1') {
+            // console.log('111111111111');
             this.attendanceStatus = true;
             const attendanceDateTime = new Date(response.details[0].attendance_date + ' ' + response.details[0].attendance_time);
             this.attendanceDateTime = moment(attendanceDateTime).format('ddd, D MMM YY h:mm A');
@@ -360,6 +361,7 @@ export class InoutComponent implements OnInit {
   }
 
   setCurrentLoactionInterval() {
+    // console.log('22222222222');
     this.isCheckingInterval = true;
     this.backgroundMode.enable();
     this.backgroundMode.on('activate').subscribe(() => {
@@ -373,6 +375,7 @@ export class InoutComponent implements OnInit {
   }
 
   checkCurrentLoaction() {
+    // console.log('33333333333');
     this.checkGPSPermission(); // -- For mobile test
     // this.setLocationAttendanceApi(); // -- For browser test
   }

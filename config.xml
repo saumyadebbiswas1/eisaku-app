@@ -4,9 +4,17 @@
     <description>An awesome Ionic/Cordova app.</description>
     <author email="hi@ionicframework.com" href="http://ionicframework.com/">Ionic Framework Team</author>
     <content src="index.html" />
-    <access origin="*" />
+    <!-- <access origin="*" />
     <allow-intent href="http://*/*" />
-    <allow-intent href="https://*/*" />
+    <allow-intent href="https://*/*" /> -->
+    <access origin="*" />
+    <access origin="*" subdomains="true" />
+    <allow-navigation href="http:///" />
+    <allow-navigation href="https:///" />
+    <allow-navigation href="localhost:8080" />
+    <allow-navigation href="data:*" />
+    <allow-intent href="http:///" />
+    <allow-intent href="localhost:8080" />
     <allow-intent href="tel:*" />
     <allow-intent href="sms:*" />
     <allow-intent href="mailto:*" />
